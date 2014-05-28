@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SockettIO.Emitter", "SockettIO.Emitter\SockettIO.Emitter.csproj", "{7F8A7BA7-79C8-4AB6-AFD1-AE00E3B29C89}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketIO.Emitter", "SocketIO.Emitter\SocketIO.Emitter.csproj", "{7F8A7BA7-79C8-4AB6-AFD1-AE00E3B29C89}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SockettIO.Emitter.Tests", "SockettIO.Emitter.Tests\SockettIO.Emitter.Tests.csproj", "{1F25988A-CC67-4E65-9AC6-025F10C06BCD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketIO.Emitter.Tests", "SocketIO.Emitter.Tests\SocketIO.Emitter.Tests.csproj", "{1F25988A-CC67-4E65-9AC6-025F10C06BCD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

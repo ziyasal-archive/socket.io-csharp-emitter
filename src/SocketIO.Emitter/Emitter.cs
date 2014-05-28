@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using StackExchange.Redis;
 
-namespace SockettIO.Emitter
+namespace SocketIO.Emitter
 {
     public class Emitter : IEmitter
     {

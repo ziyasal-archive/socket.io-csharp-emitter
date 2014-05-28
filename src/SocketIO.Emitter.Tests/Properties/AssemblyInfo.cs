@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SockettIO.Emitter")]
+[assembly: AssemblyTitle("SocketIO.Emitter.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SockettIO.Emitter")]
+[assembly: AssemblyProduct("SocketIO.Emitter.Tests")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("72a4afbf-48ac-4470-a1c4-27d7fc647010")]
+[assembly: Guid("c941548b-a1fd-4b20-a4a6-5a311c9cbd37")]
 
 // Version information for an assembly consists of the following four values:
 //

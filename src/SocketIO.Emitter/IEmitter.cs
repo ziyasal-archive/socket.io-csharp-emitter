@@ -1,4 +1,4 @@
-﻿namespace SockettIO.Emitter
+﻿namespace SocketIO.Emitter
 {
     public interface IEmitter
     {

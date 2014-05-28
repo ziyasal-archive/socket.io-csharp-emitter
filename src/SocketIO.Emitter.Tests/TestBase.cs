@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using Ploeh.AutoFixture;
 
-namespace SockettIO.Emitter.Tests
+namespace SocketIO.Emitter.Tests
 {
     [TestFixture]
     public class TestBase

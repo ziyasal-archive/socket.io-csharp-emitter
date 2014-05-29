@@ -1,0 +1,20 @@
+{
+  "name": "SocketIO.Emitter.NodejsApp",
+  "version": "0.0.0",
+  "description": "SocketIO.Emitter.NodejsApp",
+  "main": "app.js",
+  "author": {
+    "name": "ziyasal",
+    "email": ""
+  },
+  "dependencies": {
+    "express": "3.4.4",
+    "jade": "*",
+    "stylus": "*",
+    "socket.io": "^1.0.2",
+    "socket.io-client": "^1.0.2",
+    "socket.io-redis": "^0.1.2",
+    "redis": "^0.10.3",
+    "msgpack-js": "^0.3.0"
+  }
+}

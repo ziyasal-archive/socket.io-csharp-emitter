@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketIO.Emitter", "SocketI
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketIO.Emitter.Tests", "SocketIO.Emitter.Tests\SocketIO.Emitter.Tests.csproj", "{1F25988A-CC67-4E65-9AC6-025F10C06BCD}"
 EndProject
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "SocketIO.Emitter.NodejsApp", "SocketIO.Emitter.NodejsApp\SocketIO.Emitter.NodejsApp.njsproj", "{83AAC9F6-1094-40FC-8CE9-2CA0FE8CCBAC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{1F25988A-CC67-4E65-9AC6-025F10C06BCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F25988A-CC67-4E65-9AC6-025F10C06BCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F25988A-CC67-4E65-9AC6-025F10C06BCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83AAC9F6-1094-40FC-8CE9-2CA0FE8CCBAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83AAC9F6-1094-40FC-8CE9-2CA0FE8CCBAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83AAC9F6-1094-40FC-8CE9-2CA0FE8CCBAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83AAC9F6-1094-40FC-8CE9-2CA0FE8CCBAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MsgPack;
 using StackExchange.Redis;
 
 namespace SocketIO.Emitter
@@ -42,8 +43,8 @@ namespace SocketIO.Emitter
         /// <param name="options">Emitter options</param>
         private void InitClient(EmitterOptions options)
         {
-            if (string.IsNullOrWhiteSpace(options.Socket) && string.IsNullOrWhiteSpace(options.Host)) throw new Exception("'Missing redis 'host'");
-            if (string.IsNullOrWhiteSpace(options.Socket) && options.Port == default(int)) throw new Exception("'Missing redis 'port'");
+            if (string.IsNullOrWhiteSpace(options.Host)) throw new Exception("'Missing redis 'host'");
+            if (options.Port == default(int)) throw new Exception("'Missing redis 'port'");
 
             _redisClient = ConnectionMultiplexer.Connect(string.Format("{0}:{1}", options.Host, options.Port));
         }
@@ -85,7 +86,7 @@ namespace SocketIO.Emitter
             packet["data"] = args;
 
             // set namespace to packet
-            if (_flags["nsp"] != null)
+            if (_flags.ContainsKey("nsp"))
             {
                 packet["nsp"] = _flags["nsp"];
                 _flags.Remove("nsp");
@@ -94,9 +95,9 @@ namespace SocketIO.Emitter
             {
                 packet["nsp"] = '/';
             }
-
-
-            byte[] bytes = new MsgPack.CompiledPacker().Pack(new object[] { packet, new { rooms = _rooms, flags = _flags } });
+            
+            //Fix it!
+            byte[] bytes = new CompiledPacker().Pack(new object[] { packet, new { rooms = _rooms, flags = _flags } });
 
             _redisClient.GetSubscriber().Publish(_key, bytes);
             _rooms.Clear();

@@ -2,7 +2,6 @@
 
 var express = require('express');
 var routes = require('./routes');
-var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 
@@ -38,7 +37,6 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', routes.index);
-app.get('/users', user.list);
 
 var server = http.createServer(app);
 
@@ -59,13 +57,13 @@ sio.sockets.on('connection', function (socket) {
 });
 
 //Testing purpose only.
-redisCli.subscribe("socket.io#emitter");
-redisCli.on("message", function(channel, message) {
-    //TODO: Unpack failed.
-    var unpacked = msgpack(message);
+//redisCli.subscribe("socket.io#emitter");
+//redisCli.on("message", function(channel, message) {
+//    //TODO: Unpack failed.
+//    var unpacked = msgpack(message);
 
-    console.log(channel + ": " + unpacked);
-});
+//    console.log(channel + ": " + unpacked);
+//});
 
 server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

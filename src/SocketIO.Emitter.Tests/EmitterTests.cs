@@ -17,7 +17,7 @@ namespace SocketIO.Emitter.Tests
         [Test]
         public void Should_be_able_to_emit_messages_to_client()
         {
-            _emitter.Emit("broadcast event", "Hello from emitter");
+            _emitter.Emit("broadcast event", "Hello from socket.io-emitter");
         }
     }
 }

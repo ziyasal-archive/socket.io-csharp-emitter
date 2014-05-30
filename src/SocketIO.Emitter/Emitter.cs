@@ -20,22 +20,27 @@ namespace SocketIO.Emitter
         private const int EVENT = 2;
         private const int BINARY_EVENT = 5;
 
-        public Emitter(ConnectionMultiplexer redisClient, EmitterOptions options)
+        private Emitter(ConnectionMultiplexer redisClient, EmitterOptions options, IStreamReader streamReader)
         {
-            if (redisClient == null)
-            {
-                InitClient(options);
-            }
-            else
-            {
-                _redisClient = redisClient;
-            }
+            if (redisClient == null) { InitClient(options); } else { _redisClient = redisClient; }
 
             _key = (!string.IsNullOrWhiteSpace(options.Key) ? options.Key : "socket.io") + "#emitter";
 
             _rooms = Enumerable.Empty<string>().ToList();
             _flags = new Dictionary<string, object>();
-            _streamReader = new StreamReader();
+            _streamReader = streamReader;
+        }
+
+        public Emitter(ConnectionMultiplexer redisClient,EmitterOptions options)
+            : this(redisClient, options, new StreamReader())
+        {
+
+        } 
+        
+        public Emitter(EmitterOptions options)
+            : this(null, options, new StreamReader())
+        {
+
         }
 
         /// <summary>
@@ -95,21 +100,27 @@ namespace SocketIO.Emitter
             }
 
             data["rooms"] = _rooms.Any() ? (object)_rooms : string.Empty;
-            data["flags"] = _rooms.Any() ? (object)_rooms : string.Empty;
+            data["flags"] = _flags.Any() ? (object)_flags : string.Empty;
 
-            var serializer = MessagePackSerializer.Create<object[]>();
-
-            using (Stream stream = new MemoryStream())
-            {
-                serializer.Pack(stream, new object[] { packet, data });
-                var bytes = _streamReader.ReadToEnd(stream);
-                _redisClient.GetSubscriber().Publish(_key, bytes);
-            }
+            byte[] pack = GetPackedMessage(packet, data);
+            _redisClient.GetSubscriber().Publish(_key, pack);
 
             _rooms.Clear();
             _flags.Clear();
 
             return this;
+        }
+
+
+        private byte[] GetPackedMessage(Dictionary<string, object> packet, Dictionary<string, object> data)
+        {
+            var serializer = MessagePackSerializer.Create<object[]>();
+
+            using (Stream stream = new MemoryStream())
+            {
+                serializer.Pack(stream, new object[] { packet, data });
+                return _streamReader.ReadToEnd(stream);
+            }
         }
 
         private bool HasBin(IEnumerable<object> args)

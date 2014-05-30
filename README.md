@@ -35,7 +35,6 @@ If you don't want to supply a redis client object, and want
 Specifies a specific `room` that you want to emit to.
 
 ### Emitter#In(string room):IEmitter
-### Emitter#To(string room):IEmitter
 ```cs
 
  IEmitter io = new Emitter(new EmitterOptions
@@ -45,6 +44,16 @@ Specifies a specific `room` that you want to emit to.
  });
     
  io.In("room-name").Emit("news","Hello from c# emitter");
+```
+### Emitter#To(string room):IEmitter
+```cs
+
+ IEmitter io = new Emitter(new EmitterOptions
+ {
+    Host = "localhost",
+    Port = 6379
+ });
+    
  io.To("room-name").Emit("news","Hello from c# emitter");
 ```
 

@@ -20,7 +20,7 @@ easily from c# processes.
 
 ## API
 
-### Emitter(opts)
+### Emitter(EmitterOptions opts)
 
 The following options are allowed:
 
@@ -34,7 +34,8 @@ If you don't want to supply a redis client object, and want
 
 Specifies a specific `room` that you want to emit to.
 
-### Emitter#In(string room):IEmitter && Emitter#To(string room):IEmitter
+### Emitter#In(string room):IEmitter
+### Emitter#To(string room):IEmitter
 ```cs
 
  IEmitter io = new Emitter(new EmitterOptions

@@ -57,6 +57,7 @@
     <Compile Include="StreamReader.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="SocketIO.Emitter.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

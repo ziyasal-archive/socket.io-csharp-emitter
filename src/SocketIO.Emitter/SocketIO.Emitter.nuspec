@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>SocketIO.Emitter</id>
+        <version>1.0.0</version>
+        <authors>ziyasal</authors>
+        <owners>ziyasal</owners>
+        <projectUrl>https://github.com/ziyasal/socket.io-csharp-emitter</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>A C# implementation of socket.io-emitter</description>
+        <summary>socket.io-csharp-emitter allows you to communicate with socket.io servers easily from c# processes.</summary>
+        <tags>socketio websocket real-time redis msgpack</tags>
+        <dependencies>
+			<dependency id="MsgPack.Cli" version="0.4.4" />
+			<dependency id="StackExchange.Redis" version="1.0.297" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\BuildArtifacts\SocketIO.Emitter\bin\net451\SocketIO.Emitter.dll" target="lib\net451\SocketIO.Emitter.dll" />
+    </files>
+</package>

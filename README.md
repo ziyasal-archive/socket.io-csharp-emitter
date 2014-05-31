@@ -20,7 +20,7 @@ easily from c# processes.
 
 ## API
 
-### Emitter(opts)
+### Emitter(EmitterOptions opts)
 
 The following options are allowed:
 
@@ -32,15 +32,44 @@ If you don't want to supply a redis client object, and want
 `socket.io-csharp-emitter` to intiialize one for you, make sure to supply the
 `host` and `port` options.
 
-### Emitter#to(string room):IEmitter
-### Emitter#in(string room):IEmitter
-
 Specifies a specific `room` that you want to emit to.
 
+### Emitter#In(string room):IEmitter
+```cs
+
+ IEmitter io = new Emitter(new EmitterOptions
+ {
+    Host = "localhost",
+    Port = 6379
+ });
+    
+ io.In("room-name").Emit("news","Hello from c# emitter");
+```
+### Emitter#To(string room):IEmitter
+```cs
+
+ IEmitter io = new Emitter(new EmitterOptions
+ {
+    Host = "localhost",
+    Port = 6379
+ });
+    
+ io.To("room-name").Emit("news","Hello from c# emitter");
+```
 
 ### Emitter#Of(string namespace):IEmitter
-
 Specifies a specific namespace that you want to emit to.
+```cs
+
+ IEmitter io = new Emitter(new EmitterOptions
+ {
+    Host = "localhost",
+    Port = 6379
+ });
+    
+ io.Of("/nsp").In("room-name").Emit("news","Hello from c# emitter");
+```
+
 
 ## License
 

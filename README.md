@@ -9,6 +9,10 @@ easily from c# processes.
 ## How to use
 
 ```cs
+PM> Install-Package SocketIO.Emitter
+```
+
+```cs
 
  IEmitter io = new Emitter(new EmitterOptions
     {

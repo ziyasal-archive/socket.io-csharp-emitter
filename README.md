@@ -3,8 +3,7 @@ socket.io-csharp-emitter
 
 A C# implementation of socket.io-emitter
 
-`socket.io-csharp-emitter` allows you to communicate with socket.io servers
-easily from c# processes.
+[socket.io](http://socket.io/) provides a hook point to easily allow you to emit events to browsers from anywhere so `socket.io-csharp-emitter` communicates with [socket.io](http://socket.io/) servers through redis
 
 ## How to use
 

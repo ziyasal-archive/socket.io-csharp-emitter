@@ -13,8 +13,8 @@ namespace SocketIO.Emitter.Tests
         private Process _redisCli;
         private Process _redisServer;
 
-        const string REDIS_SERVER_PATH = @"packages/Redis-64.2.8.4/redis-server.exe";
-        const string REDIS_REDIS_CLI_EXE_PATH = @"packages/Redis-64.2.8.4/redis-cli.exe";
+        const string REDIS_SERVER_PATH = @"packages\Redis-64.2.8.4\redis-server.exe";
+        const string REDIS_REDIS_CLI_EXE_PATH = @"packages\Redis-64.2.8.4\redis-cli.exe";
 
         private string _srcFolderPath;
 
@@ -71,7 +71,7 @@ namespace SocketIO.Emitter.Tests
             _emitter.Emit("hello", "Hello Socket.io");
             Task<string> readToEnd = _redisCli.StandardOutput.ReadToEndAsync();
 
-            readToEnd.Wait(1000);
+            readToEnd.Wait(5000);
 
             _redisCli.Kill();
 
@@ -104,7 +104,7 @@ namespace SocketIO.Emitter.Tests
             _emitter.Of("/nsp").Emit("broadcast event", "Hello from socket.io-emitter");
             Task<string> readToEnd = _redisCli.StandardOutput.ReadToEndAsync();
 
-            readToEnd.Wait(1000);
+            readToEnd.Wait(5000);
 
             _redisCli.Kill();
 
@@ -118,7 +118,7 @@ namespace SocketIO.Emitter.Tests
             _emitter.In("hello-room").Emit("broadcast event", "Hello from socket.io-emitter");
             Task<string> readToEnd = _redisCli.StandardOutput.ReadToEndAsync();
 
-            readToEnd.Wait(1000);
+            readToEnd.Wait(5000);
 
             _redisCli.Kill();
 

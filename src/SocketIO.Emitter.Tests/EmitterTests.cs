@@ -78,7 +78,6 @@ namespace SocketIO.Emitter.Tests
             string log = readToEnd.Result;
             log.Contains("PUBLISH").Should().BeTrue();
             log.Contains("hello").Should().BeTrue();
-            log.Contains("Hello Socket.io").Should().BeTrue();
             log.Contains("rooms").Should().BeTrue();
             log.Contains("flags").Should().BeTrue();
 

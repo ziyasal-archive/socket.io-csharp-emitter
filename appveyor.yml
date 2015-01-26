@@ -1,0 +1,11 @@
+configuration: Release
+branches:
+  only:
+    - master
+
+before_build:
+  - nuget restore src/SocketIO.Emitter.sln
+
+build:
+  project: src/SocketIO.Emitter.sln       
+  verbosity: minimal

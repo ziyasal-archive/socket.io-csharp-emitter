@@ -15,16 +15,17 @@ namespace SocketIO.Emitter
         private readonly List<string> _rooms;
         private readonly Dictionary<string, object> _flags;
 
-        private readonly string _key;
-
-        private const int EVENT = 2;
+        private readonly string _prefix;
+		private const int EVENT = 2;
         private const int BINARY_EVENT = 5;
+
+		private string _uid = "emitter";
 
         private Emitter(ConnectionMultiplexer redisClient, EmitterOptions options, IStreamReader streamReader)
         {
             if (redisClient == null) { InitClient(options); } else { _redisClient = redisClient; }
 
-            _key = (!string.IsNullOrWhiteSpace(options.Key) ? options.Key : "socket.io") + "#emitter";
+			_prefix = (!string.IsNullOrWhiteSpace(options.Key) ? options.Key : "socket.io");
 
             _rooms = Enumerable.Empty<string>().ToList();
             _flags = new Dictionary<string, object>();
@@ -88,7 +89,7 @@ namespace SocketIO.Emitter
         public IEmitter Emit(params object[] args)
         {
             Dictionary<string, object> packet = new Dictionary<string, object>();
-            Dictionary<string, object> data = new Dictionary<string, object>();
+            Dictionary<string, object> opts = new Dictionary<string, object>();
             packet["type"] = HasBin(args) ? BINARY_EVENT : EVENT;
             packet["data"] = args;
 
@@ -99,26 +100,43 @@ namespace SocketIO.Emitter
                 _flags.Remove("nsp");
             }
 
-            data["rooms"] = _rooms.Any() ? (object)_rooms : string.Empty;
-            data["flags"] = _flags.Any() ? (object)_flags : string.Empty;
+			opts["rooms"] = _rooms.Any() ? (object)_rooms : string.Empty;
+			opts["flags"] = _flags.Any() ? (object)_flags : string.Empty;
 
-            byte[] pack = GetPackedMessage(packet, data);
+			string chn = _prefix + '#' + packet["nsp"] + '#';
+			byte[] msg = GetPackedMessage(_uid, packet, opts); // [uid, packet, opts]
+
+			/*byte[] pack = GetPackedMessage(packet, data);
             _redisClient.GetSubscriber().Publish(_key, pack);
+			*/
 
-            _rooms.Clear();
+			if (_rooms.Any())
+			{
+				foreach(string room in _rooms)
+				{
+					var chnRoom = chn + room + '#';
+					_redisClient.GetSubscriber().Publish(chnRoom, msg);
+				}
+			}
+			else
+			{
+				_redisClient.GetSubscriber().Publish(chn, msg);
+			}
+
+			_rooms.Clear();
             _flags.Clear();
 
             return this;
         }
 
 
-        private byte[] GetPackedMessage(Dictionary<string, object> packet, Dictionary<string, object> data)
+        private byte[] GetPackedMessage(string uid, Dictionary<string, object> packet, Dictionary<string, object> data)
         {
             var serializer = MessagePackSerializer.Create<object[]>();
 
             using (Stream stream = new MemoryStream())
             {
-                serializer.Pack(stream, new object[] { packet, data });
+                serializer.Pack(stream, new object[] { uid, packet, data });
                 return _streamReader.ReadToEnd(stream);
             }
         }

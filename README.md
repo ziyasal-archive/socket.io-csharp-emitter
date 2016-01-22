@@ -32,6 +32,9 @@ The following options are allowed:
 - `Key`: the name of the key to pub/sub events on as prefix (`socket.io`)
 - `Host`: host to connect to redis on (`localhost`)
 - `Port`: port to connect to redis on (`6379`)
+- `Version`: Version of socket IO (`EmitterOptions.EVersion.V0_9_9`) 
+
+NB : If you use a version of socket.io >= 1.4.4 change property `Version` to EmitterOptions.EVersion.V1_4_4.
 
 If you don't want to supply a redis client object, and want
 `socket.io-csharp-emitter` to intiialize one for you, make sure to supply the

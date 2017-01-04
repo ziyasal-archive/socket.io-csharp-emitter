@@ -59,6 +59,7 @@
     <Compile Include="Flag.cs" />
     <Compile Include="IEmitter.cs" />
     <Compile Include="IStreamReader.cs" />
+    <Compile Include="PacketObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StreamReader.cs" />
   </ItemGroup>

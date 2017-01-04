@@ -9,6 +9,8 @@ namespace SocketIO.Emitter
 {
     public class Emitter : IEmitter
     {
+        private SerializationContext ctx = new SerializationContext() { SerializationMethod = SerializationMethod.Map };
+
         private ConnectionMultiplexer _redisClient;
         private readonly IStreamReader _streamReader;
 
@@ -16,35 +18,35 @@ namespace SocketIO.Emitter
         private readonly Dictionary<string, object> _flags;
 
         private readonly string _prefix;
-		private const int EVENT = 2;
+        private const int EVENT = 2;
         private const int BINARY_EVENT = 5;
 
-		private string _uid = "emitter";
-		private EmitterOptions.EVersion _version;
+        private string _uid = "emitter";
+        private EmitterOptions.EVersion _version;
 
-		private Emitter(ConnectionMultiplexer redisClient, EmitterOptions options, IStreamReader streamReader)
+        private Emitter(ConnectionMultiplexer redisClient, EmitterOptions options, IStreamReader streamReader)
         {
             if (redisClient == null) { InitClient(options); } else { _redisClient = redisClient; }
 
-			_prefix = (!string.IsNullOrWhiteSpace(options.Key) ? options.Key : "socket.io");
+            _prefix = (!string.IsNullOrWhiteSpace(options.Key) ? options.Key : "socket.io");
 
-			_version = options.Version;
+            _version = options.Version;
 
-			if (_version == EmitterOptions.EVersion.V0_9_9)
-				_prefix += "#emitter";
+            if (_version == EmitterOptions.EVersion.V0_9_9)
+                _prefix += "#emitter";
 
 
-			_rooms = Enumerable.Empty<string>().ToList();
+            _rooms = Enumerable.Empty<string>().ToList();
             _flags = new Dictionary<string, object>();
             _streamReader = streamReader;
         }
 
-        public Emitter(ConnectionMultiplexer redisClient,EmitterOptions options)
+        public Emitter(ConnectionMultiplexer redisClient, EmitterOptions options)
             : this(redisClient, options, new StreamReader())
         {
 
-        } 
-        
+        }
+
         public Emitter(EmitterOptions options)
             : this(null, options, new StreamReader())
         {
@@ -95,78 +97,85 @@ namespace SocketIO.Emitter
 
         public IEmitter Emit(params object[] args)
         {
-            Dictionary<string, object> packet = new Dictionary<string, object>();
+            return Emit((string)args[0], args[1]);
+        }
+
+
+        public IEmitter Emit<T>(string eventName, T arg)
+        {
+            PacketObject<T> packet = new PacketObject<T>();
             Dictionary<string, object> opts = new Dictionary<string, object>();
-            packet["type"] = HasBin(args) ? BINARY_EVENT : EVENT;
-            packet["data"] = args;
+            packet.type = HasBin(arg) ? BINARY_EVENT : EVENT;
+            packet.data = Tuple.Create(eventName, arg);
 
             // set namespace to packet
             if (_flags.ContainsKey("nsp"))
             {
-                packet["nsp"] = _flags["nsp"];
+                packet.nsp = _flags["nsp"];
                 _flags.Remove("nsp");
             }
 
-			// default emit to namespace /
-			if(!packet.ContainsKey("nsp"))
-			{
-				packet["nsp"] = "/";
-			}
+            // default emit to namespace /
+            if (packet.nsp == null)
+            {
+                packet.nsp = "/";
+            }
 
-			opts["rooms"] = _rooms.Any() ? (object)_rooms : string.Empty;
-			opts["flags"] = _flags.Any() ? (object)_flags : string.Empty;
+            opts["rooms"] = _rooms.Any() ? (object)_rooms : string.Empty;
+            opts["flags"] = _flags.Any() ? (object)_flags : string.Empty;
 
-			if(_version == EmitterOptions.EVersion.V0_9_9)
-			{
-				byte[] pack = GetPackedMessage(packet, opts);
-				_redisClient.GetSubscriber().Publish(_prefix, pack);
-			}
-			else
-			{ 
-				string chn = _prefix + '#' + packet["nsp"] + '#';
-				byte[] msg = GetPackedMessage(packet, opts, _uid); 
+            if (_version == EmitterOptions.EVersion.V0_9_9)
+            {
+                byte[] pack = GetPackedMessage(packet, opts);
+                _redisClient.GetSubscriber().Publish(_prefix, pack);
+            }
+            else
+            {
+                string chn = _prefix + '#' + packet.nsp + '#';
+                byte[] msg = GetPackedMessage(packet, opts, _uid);
 
-				if (_rooms.Any())
-				{
-					foreach(string room in _rooms)
-					{
-						var chnRoom = chn + room + '#';
-						_redisClient.GetSubscriber().Publish(chnRoom, msg);
-					}
-				}
-				else
-				{
-					_redisClient.GetSubscriber().Publish(chn, msg);
-				}
-			}
-			_rooms.Clear();
+                if (_rooms.Any())
+                {
+                    foreach (string room in _rooms)
+                    {
+                        var chnRoom = chn + room + '#';
+                        _redisClient.GetSubscriber().Publish(chnRoom, msg);
+                    }
+                }
+                else
+                {
+                    _redisClient.GetSubscriber().Publish(chn, msg);
+                }
+            }
+            _rooms.Clear();
             _flags.Clear();
 
             return this;
         }
 
 
-        private byte[] GetPackedMessage(Dictionary<string, object> packet, Dictionary<string, object> data, string uid = null)
+        private byte[] GetPackedMessage<T>(PacketObject<T> packet, Dictionary<string, object> data, string uid = null)
         {
-            var serializer = MessagePackSerializer.Create<object[]>();
-
             using (Stream stream = new MemoryStream())
             {
-				object[] obj;
-				if(uid == null)
-					obj = new object[] { packet, data };
-				else
-					obj = new object[] { uid, packet, data };
-				
+                if (uid == null)
+                {
+                    var serializer = MessagePackSerializer.Get<Tuple<PacketObject<T>, object>>(ctx);
+                    serializer.Pack(stream, new Tuple<PacketObject<T>, object>(packet, data));
+                }
+                else
+                {
+                    var serializer = MessagePackSerializer.Get<Tuple<object, PacketObject<T>, object>>(ctx);
+                    serializer.Pack(stream, new Tuple<object, PacketObject<T>, object>(uid, packet, data));
+                }
 
-				serializer.Pack(stream, obj);
                 return _streamReader.ReadToEnd(stream);
             }
         }
 
-        private bool HasBin(IEnumerable<object> args)
+        private bool HasBin<T>(T arg)
         {
-            return args.Any(arg => arg.GetType() == typeof(byte[]));
+            return arg.GetType() == typeof(byte[]);
         }
     }
 }

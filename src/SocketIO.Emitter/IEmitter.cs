@@ -7,5 +7,6 @@
         IEmitter Of(string nsp);
 
         IEmitter Emit(params object[] args);
+        IEmitter Emit<T>(string eventName, T args);
     }
 }

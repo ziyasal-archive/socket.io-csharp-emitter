@@ -175,7 +175,7 @@ namespace SocketIO.Emitter
 
         private bool HasBin<T>(T arg)
         {
-            return arg.GetType() == typeof(byte[]);
+            return arg != null && arg.GetType() == typeof(byte[]);
         }
     }
 }

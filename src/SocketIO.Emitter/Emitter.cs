@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using MsgPack.Serialization;
 using StackExchange.Redis;
+using System.Threading.Tasks;
 
 namespace SocketIO.Emitter
 {
@@ -145,10 +146,63 @@ namespace SocketIO.Emitter
             return this;
         }
 
+        public async Task<IEmitter> EmitAsync(params object[] args)
+        {
+            Dictionary<string, object> packet = new Dictionary<string, object>();
+            Dictionary<string, object> opts = new Dictionary<string, object>();
+            packet["type"] = HasBin(args) ? BINARY_EVENT : EVENT;
+            packet["data"] = args;
+
+            // set namespace to packet
+            if (_flags.ContainsKey("nsp"))
+            {
+                packet["nsp"] = _flags["nsp"];
+                _flags.Remove("nsp");
+            }
+
+            // default emit to namespace /
+            if (!packet.ContainsKey("nsp"))
+            {
+                packet["nsp"] = "/";
+            }
+
+            opts["rooms"] = _rooms.Any() ? (object)_rooms : string.Empty;
+            opts["flags"] = _flags.Any() ? (object)_flags : string.Empty;
+
+            if (_version == EmitterOptions.EVersion.V0_9_9)
+            {
+                byte[] pack = GetPackedMessage(packet, opts);
+                await _redisClient.GetSubscriber().PublishAsync(_prefix, pack);
+            }
+            else
+            {
+                string chn = _prefix + '#' + packet["nsp"] + '#';
+                byte[] msg = GetPackedMessage(packet, opts, _uid);
+
+                if (_rooms.Any())
+                {
+                    foreach (string room in _rooms)
+                    {
+                        var chnRoom = chn + room + '#';
+                        await _redisClient.GetSubscriber().PublishAsync(chnRoom, msg);
+                    }
+                }
+                else
+                {
+                    await _redisClient.GetSubscriber().PublishAsync(chn, msg);
+                }
+            }
+            _rooms.Clear();
+            _flags.Clear();
+
+            return this;
+        }
+
+
 
         private byte[] GetPackedMessage(Dictionary<string, object> packet, Dictionary<string, object> data, string uid = null)
         {
-            var serializer = MessagePackSerializer.Create<object[]>();
+            var serializer = MessagePackSerializer.Get<object[]>();
 
             using (Stream stream = new MemoryStream())
             {

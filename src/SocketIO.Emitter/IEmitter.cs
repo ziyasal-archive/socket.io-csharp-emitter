@@ -1,4 +1,6 @@
-﻿namespace SocketIO.Emitter
+﻿using System.Threading.Tasks;
+
+namespace SocketIO.Emitter
 {
     public interface IEmitter
     {
@@ -7,5 +9,6 @@
         IEmitter Of(string nsp);
 
         IEmitter Emit(params object[] args);
+        Task<IEmitter> EmitAsync(params object[] args);
     }
 }

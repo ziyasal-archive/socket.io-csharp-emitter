@@ -22,6 +22,7 @@ namespace SocketIO.Emitter
         private const int BINARY_EVENT = 5;
 
         private string _uid = "emitter";
+        private string _nsp = "/";
         private EmitterOptions.EVersion _version;
 
         private Emitter(ConnectionMultiplexer redisClient, EmitterOptions options, IStreamReader streamReader)
@@ -91,7 +92,7 @@ namespace SocketIO.Emitter
 
         public IEmitter Of(string nsp)
         {
-            _flags["nsp"] = nsp;
+            _nsp = nsp;
             return this;
         }
 
@@ -108,18 +109,7 @@ namespace SocketIO.Emitter
             packet.type = HasBin(arg) ? BINARY_EVENT : EVENT;
             packet.data = Tuple.Create(eventName, arg);
 
-            // set namespace to packet
-            if (_flags.ContainsKey("nsp"))
-            {
-                packet.nsp = _flags["nsp"];
-                _flags.Remove("nsp");
-            }
-
-            // default emit to namespace /
-            if (packet.nsp == null)
-            {
-                packet.nsp = "/";
-            }
+            packet.nsp = _nsp;
 
             opts["rooms"] = _rooms.Any() ? (object)_rooms : string.Empty;
             opts["flags"] = _flags.Any() ? (object)_flags : string.Empty;

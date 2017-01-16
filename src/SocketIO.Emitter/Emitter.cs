@@ -27,6 +27,8 @@ namespace SocketIO.Emitter
 
         private Emitter(ConnectionMultiplexer redisClient, EmitterOptions options, IStreamReader streamReader)
         {
+            ctx.Serializers.RegisterOverride(new IsoDateTimeSerializer(ctx));
+
             if (redisClient == null) { InitClient(options); } else { _redisClient = redisClient; }
 
             _prefix = (!string.IsNullOrWhiteSpace(options.Key) ? options.Key : "socket.io");

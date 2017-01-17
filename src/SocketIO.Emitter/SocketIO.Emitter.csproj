@@ -67,7 +67,8 @@
     <Compile Include="EmitterOptions.cs" />
     <Compile Include="Flag.cs" />
     <Compile Include="IEmitter.cs" />
-    <Compile Include="IsoDateTimeConverter.cs" />
+    <Compile Include="IsoDateTimeSerializer.cs" />
+    <Compile Include="IsoNullableDateTimeSerializer.cs" />
     <Compile Include="IStreamReader.cs" />
     <Compile Include="PacketObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

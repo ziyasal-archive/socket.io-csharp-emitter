@@ -14,7 +14,10 @@ namespace SocketIO.Emitter
 
         protected override void PackToCore(Packer packer, DateTime objectTree)
         {
-            packer.Pack(objectTree.ToString("o"));
+            var date = objectTree.Kind == DateTimeKind.Unspecified ?
+                DateTime.SpecifyKind(objectTree, DateTimeKind.Utc) : objectTree;
+            
+            packer.Pack(date.ToString("o"));
         }
 
         protected override DateTime UnpackFromCore(Unpacker unpacker)

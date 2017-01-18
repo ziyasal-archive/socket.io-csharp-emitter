@@ -16,7 +16,10 @@ namespace SocketIO.Emitter
         {
             if (objectTree.HasValue)
             {
-                packer.Pack(objectTree.Value.ToString("o"));
+                var date = objectTree.Value.Kind == DateTimeKind.Unspecified
+                    ? DateTime.SpecifyKind(objectTree.Value, DateTimeKind.Utc) : objectTree.Value;
+
+                packer.Pack(date.ToString("o"));
             }
         }
 

@@ -1,14 +1,18 @@
-﻿using System;
+﻿using log4net;
+using MsgPack.Serialization;
+using StackExchange.Redis;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MsgPack.Serialization;
-using StackExchange.Redis;
+using System.Threading.Tasks;
 
 namespace SocketIO.Emitter
 {
     public class Emitter : IEmitter
     {
+        ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private SerializationContext ctx = new SerializationContext() { SerializationMethod = SerializationMethod.Map };
 
         private ConnectionMultiplexer _redisClient;
@@ -104,7 +108,6 @@ namespace SocketIO.Emitter
             return Emit((string)args[0], args[1]);
         }
 
-
         public IEmitter Emit<T>(string eventName, T arg)
         {
             PacketObject<T> packet = new PacketObject<T>();
@@ -120,6 +123,7 @@ namespace SocketIO.Emitter
             if (_version == EmitterOptions.EVersion.V0_9_9)
             {
                 byte[] pack = GetPackedMessage(packet, opts);
+
                 _redisClient.GetSubscriber().Publish(_prefix, pack);
             }
             else
@@ -132,11 +136,14 @@ namespace SocketIO.Emitter
                     foreach (string room in _rooms)
                     {
                         var chnRoom = chn + room + '#';
+
+                        log.Debug($"Emitting signal [{eventName}:{chnRoom}]");
                         _redisClient.GetSubscriber().Publish(chnRoom, msg);
                     }
                 }
                 else
                 {
+                    log.Debug($"Emitting signal [{eventName}:{chn}]");
                     _redisClient.GetSubscriber().Publish(chn, msg);
                 }
             }
@@ -146,6 +153,59 @@ namespace SocketIO.Emitter
             return this;
         }
 
+        private bool HasBin<T>(T arg)
+        {
+            return arg != null && arg.GetType() == typeof(byte[]);
+        }
+
+        public async Task<IEmitter> EmitAsync(params object[] args)
+        {
+            return await EmitAsync((string)args[0], args[1]);
+        }
+
+        public async Task<IEmitter> EmitAsync<T>(string eventName, T arg)
+        {
+            PacketObject<T> packet = new PacketObject<T>();
+            Dictionary<string, object> opts = new Dictionary<string, object>();
+            packet.type = HasBin(arg) ? BINARY_EVENT : EVENT;
+            packet.data = Tuple.Create(eventName, arg);
+
+            packet.nsp = _nsp;
+
+            opts["rooms"] = _rooms.Any() ? (object)_rooms : string.Empty;
+            opts["flags"] = _flags.Any() ? (object)_flags : string.Empty;
+
+            if (_version == EmitterOptions.EVersion.V0_9_9)
+            {
+                byte[] pack = GetPackedMessage(packet, opts);
+                await _redisClient.GetSubscriber().PublishAsync(_prefix, pack);
+            }
+            else
+            {
+                string chn = _prefix + '#' + packet.nsp + '#';
+                byte[] msg = GetPackedMessage(packet, opts, _uid);
+
+                if (_rooms.Any())
+                {
+                    foreach (string room in _rooms)
+                    {
+                        var chnRoom = chn + room + '#';
+
+                        log.Debug($"Emitting signal [{eventName}:{chnRoom}]");
+                        await _redisClient.GetSubscriber().PublishAsync(chnRoom, msg);
+                    }
+                }
+                else
+                {
+                    log.Debug($"Emitting signal [{eventName}:{chn}]");
+                    await _redisClient.GetSubscriber().PublishAsync(chn, msg);
+                }
+            }
+            _rooms.Clear();
+            _flags.Clear();
+
+            return this;
+        }
 
         private byte[] GetPackedMessage<T>(PacketObject<T> packet, Dictionary<string, object> data, string uid = null)
         {
@@ -166,9 +226,5 @@ namespace SocketIO.Emitter
             }
         }
 
-        private bool HasBin<T>(T arg)
-        {
-            return arg != null && arg.GetType() == typeof(byte[]);
-        }
     }
 }

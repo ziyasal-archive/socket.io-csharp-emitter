@@ -13,7 +13,8 @@ namespace SocketIO.Emitter
     {
         ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private SerializationContext ctx = new SerializationContext() { SerializationMethod = SerializationMethod.Map };
+        private static SerializationContext ctx;
+        private static MessagePackSerializer asyncSerializer;
 
         private ConnectionMultiplexer _redisClient;
         private readonly IStreamReader _streamReader;
@@ -31,8 +32,14 @@ namespace SocketIO.Emitter
 
         private Emitter(ConnectionMultiplexer redisClient, EmitterOptions options, IStreamReader streamReader)
         {
-            ctx.Serializers.RegisterOverride(new IsoDateTimeSerializer(ctx));
-            ctx.Serializers.RegisterOverride(new IsoNullableDateTimeSerializer(ctx));
+            if (ctx == null)
+            {
+                ctx = new SerializationContext() { SerializationMethod = SerializationMethod.Map };
+                ctx.Serializers.RegisterOverride(new IsoDateTimeSerializer(ctx));
+                ctx.Serializers.RegisterOverride(new IsoNullableDateTimeSerializer(ctx));
+
+                asyncSerializer = MessagePackSerializer.Get<object[]>(ctx);
+            }
 
             if (redisClient == null) { InitClient(options); } else { _redisClient = redisClient; }
 
@@ -177,13 +184,13 @@ namespace SocketIO.Emitter
 
             if (_version == EmitterOptions.EVersion.V0_9_9)
             {
-                byte[] pack = GetPackedMessage(packet, opts);
+                byte[] pack = await GetPackedMessageAsync(packet, opts);
                 await _redisClient.GetSubscriber().PublishAsync(_prefix, pack);
             }
             else
             {
                 string chn = _prefix + '#' + packet.nsp + '#';
-                byte[] msg = GetPackedMessage(packet, opts, _uid);
+                byte[] msg = await GetPackedMessageAsync(packet, opts, _uid);
 
                 if (_rooms.Any())
                 {
@@ -220,6 +227,25 @@ namespace SocketIO.Emitter
                 {
                     var serializer = MessagePackSerializer.Get<Tuple<object, PacketObject<T>, object>>(ctx);
                     serializer.Pack(stream, new Tuple<object, PacketObject<T>, object>(uid, packet, data));
+                }
+
+                return _streamReader.ReadToEnd(stream);
+            }
+        }
+
+        private async Task<byte[]> GetPackedMessageAsync<T>(PacketObject<T> packet, Dictionary<string, object> data, string uid = null)
+        {
+            using (Stream stream = new MemoryStream())
+            {
+                if (uid == null)
+                {
+                    var serializer = MessagePackSerializer.Get<object[]>(ctx);
+                    await serializer.PackAsync(stream, new object[] { packet, data });
+                }
+                else
+                {
+                    var serializer = MessagePackSerializer.Get<object[]>(ctx);
+                    await serializer.PackAsync(stream, new object[] { uid, packet, data });
                 }
 
                 return _streamReader.ReadToEnd(stream);

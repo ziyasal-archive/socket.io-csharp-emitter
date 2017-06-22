@@ -220,13 +220,13 @@ namespace SocketIO.Emitter
             {
                 if (uid == null)
                 {
-                    var serializer = MessagePackSerializer.Get<Tuple<PacketObject<T>, object>>(ctx);
-                    serializer.Pack(stream, new Tuple<PacketObject<T>, object>(packet, data));
+                    var serializer = MessagePackSerializer.Get<object[]>(ctx);
+                    serializer.Pack(stream, new object[] { packet, data });
                 }
                 else
                 {
-                    var serializer = MessagePackSerializer.Get<Tuple<object, PacketObject<T>, object>>(ctx);
-                    serializer.Pack(stream, new Tuple<object, PacketObject<T>, object>(uid, packet, data));
+                    var serializer = MessagePackSerializer.Get<object[]>(ctx);
+                    serializer.Pack(stream, new object[] { uid, packet, data });
                 }
 
                 return _streamReader.ReadToEnd(stream);

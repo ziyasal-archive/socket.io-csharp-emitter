@@ -4,8 +4,8 @@ namespace SocketIO.Emitter
 {
     public interface IEmitter
     {
-        IEmitter In(string room);
         IEmitter To(string room);
+        IEmitter To(params string[] rooms);
         IEmitter Of(string nsp);
 
         IEmitter Emit(params object[] args);

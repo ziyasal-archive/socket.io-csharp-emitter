@@ -81,27 +81,31 @@ namespace SocketIO.Emitter
         }
 
         /// <summary>
-        ///  Limit emission to a certain `room`.
-        /// </summary>
-        /// <param name="room">room</param>
-        /// <returns></returns>
-        public IEmitter In(string room)
-        {
-            if (!_rooms.Contains(room))
-            {
-                _rooms.Add(room);
-            }
-            return this;
-        }
-
-        /// <summary>
         /// Alias for in
         /// </summary>
         /// <param name="room">room</param>
         /// <returns></returns>
         public IEmitter To(string room)
         {
-            return In(room);
+            _rooms.Clear();
+
+            if (!_rooms.Contains(room))
+                _rooms.Add(room);
+
+            return this;
+        }
+
+        public IEmitter To(params string[] rooms)
+        {
+            _rooms.Clear();
+
+            foreach (var room in rooms)
+            {
+                if (!_rooms.Contains(room))
+                    _rooms.Add(room);
+            }
+
+            return this;
         }
 
         public IEmitter Of(string nsp)
